@@ -7,6 +7,7 @@ import java.util.List;
  */
 public class Composite {
     private String compositeId;
+    private String compositeName;
     private List<Account> accounts;
     private Double mrktVal;
     private Double perfVal;
@@ -17,6 +18,14 @@ public class Composite {
 
     public void setCompositeId(String compositeId) {
         this.compositeId = compositeId;
+    }
+
+    public String getCompositeName() {
+        return compositeName;
+    }
+
+    public void setCompositeName(String compositeName) {
+        this.compositeName = compositeName;
     }
 
     public List<Account> getAccounts() {

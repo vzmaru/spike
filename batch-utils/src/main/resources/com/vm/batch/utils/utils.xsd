@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.vm.com/schema/batch/utils"
+           elementFormDefault="qualified" targetNamespace="http://www.vm.com/schema/batch/utils">
+    <xs:element name="file-read">
+        <xs:complexType>
+            <xs:attribute name="id" use="required" type="xs:ID"/>
+            <xs:attribute name="resource" use="required"/>
+            <xs:attribute name="fieldNames"/>
+            <xs:attribute name="delimiter"/>
+            <xs:attribute name="beanType"/>
+            <xs:attribute name="scope"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="file-write">
+        <xs:complexType>
+            <xs:attribute name="id" use="required" type="xs:ID"/>
+            <xs:attribute name="resource" use="required"/>
+            <xs:attribute name="fieldNames"/>
+            <xs:attribute name="delimiter"/>
+            <xs:attribute name="scope"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
