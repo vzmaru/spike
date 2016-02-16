@@ -3,17 +3,17 @@ package com.fmr.papr.poc.domain;
 /**
  * Created by vishal on 1/18/16.
  */
-public class Account {
-    private String accNum;
+public class Entity {
+    private String entityId;
     private Double mrktVal;
     private Double perfVal;
 
-    public String getAccNum() {
-        return accNum;
+    public String getEntityId() {
+        return entityId;
     }
 
-    public void setAccNum(String accNum) {
-        this.accNum = accNum;
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
 
     public Double getMrktVal() {

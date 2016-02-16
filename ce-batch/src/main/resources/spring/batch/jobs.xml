@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:batch-int="http://www.springframework.org/schema/batch-integration"
+             xmlns:int="http://www.springframework.org/schema/integration"
+             xmlns:int-file="http://www.springframework.org/schema/integration/file"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://www.springframework.org/schema/batch"
+             xsi:schemaLocation="
+             http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd
+             http://www.springframework.org/schema/batch-integration http://www.springframework.org/schema/batch-integration/spring-batch-integration.xsd
+             http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+             http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+		         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+  <beans:import resource="classpath:spring/batch/jobs-context.xml"/>
+
+  <job id="spikeCE">
+    <step id="step1">
+      <tasklet task-executor="taskExecutor">
+        <chunk commit-interval="5"
+               reader="ceReader"
+               processor="itemProc"
+               writer="fileWriter"/>
+      </tasklet>
+    </step>
+  </job>
+
+  <int:channel id="inboundFileChannel"/>
+  <int:channel id="outboundJobRequestChannel"/>
+  <int:channel id="jobLaunchReplyChannel"/>
+
+  <int-file:inbound-channel-adapter id="filePoller"
+                                    channel="inboundFileChannel"
+                                    directory="file:/tmp/myfiles/"
+                                    filename-pattern="*.csv">
+    <int:poller fixed-rate="1000"/>
+  </int-file:inbound-channel-adapter>
+
+  <int:transformer input-channel="inboundFileChannel"
+                   output-channel="outboundJobRequestChannel">
+    <beans:bean class="io.spring.sbi.FileMessageToJobRequest">
+      <beans:property name="job" ref="personJob"/>
+      <beans:property name="fileParameterName" value="input.file.name"/>
+    </beans:bean>
+  </int:transformer>
+
+  <batch-int:job-launching-gateway request-channel="outboundJobRequestChannel"
+                                   reply-channel="jobLaunchReplyChannel"/>
+
+  <int:logging-channel-adapter channel="jobLaunchReplyChannel"/>
+
+</beans:beans>

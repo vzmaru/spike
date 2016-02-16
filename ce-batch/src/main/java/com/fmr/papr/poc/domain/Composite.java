@@ -8,7 +8,7 @@ import java.util.List;
 public class Composite {
     private String compositeId;
     private String compositeName;
-    private List<Account> accounts;
+    private List<Entity> entities;
     private Double mrktVal;
     private Double perfVal;
 
@@ -28,12 +28,12 @@ public class Composite {
         this.compositeName = compositeName;
     }
 
-    public List<Account> getAccounts() {
-        return accounts;
+    public List<Entity> getEntities() {
+        return entities;
     }
 
-    public void setAccounts(List<Account> accounts) {
-        this.accounts = accounts;
+    public void setEntities(List<Entity> entities) {
+        this.entities = entities;
     }
 
     public Double getMrktVal() {

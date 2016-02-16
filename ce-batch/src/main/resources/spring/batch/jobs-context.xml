@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:vm="http://www.vm.com/schema/batch/utils"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.vm.com/schema/batch/utils http://www.vm.com/schema/batch/utils/utils.xsd">
+
+    <!-- stored job-meta in memory -->
+    <bean id="transactionManager"
+          class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
+
+    <bean id="jobRepository"
+          class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <bean id="jobLauncher"
+          class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository"/>
+    </bean>
+
+    <bean id="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="10"/>
+        <property name="maxPoolSize" value="15"/>
+    </bean>
+
+    <bean id="ceReader" class="com.fmr.papr.poc.reader.CEItemReader" scope="step">
+        <property name="compositeReader" ref="fileReader"/>
+        <property name="entityDAO">
+            <bean class="com.fmr.papr.poc.dao.impl.FileEntityDAOImpl" scope="step">
+                <property name="lineMapper">
+                    <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                        <property name="lineTokenizer">
+                            <bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                                <property name="names" value="entityId, mrktVal, perfVal"/>
+                            </bean>
+                        </property>
+                        <property name="fieldSetMapper">
+                            <bean class="org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper">
+                                <property name="targetType" value="com.fmr.papr.poc.domain.Entity"/>
+                            </bean>
+                        </property>
+                    </bean>
+                </property>
+                <property name="path" value="classpath:data/#{jobParameters['jobId']}"/>
+            </bean>
+        </property>
+    </bean>
+
+    <vm:file-read id="fileReader"
+                  resource="classpath:data/#{jobParameters['jobId']}/in#{jobParameters['compositeId']}.csv"
+                  fieldNames="compositeId, compositeName"
+                  beanType="com.fmr.papr.poc.domain.Composite"
+                  scope="step"/>
+
+    <bean id="itemProc" class="com.fmr.papr.poc.processor.CEItemProcessor"/>
+
+    <vm:file-write id="fileWriter"
+                   resource="file:target/out.csv"
+                   fieldNames="compositeId, compositeName, mrktVal, perfVal"
+                   scope="step"/>
+
+</beans>
