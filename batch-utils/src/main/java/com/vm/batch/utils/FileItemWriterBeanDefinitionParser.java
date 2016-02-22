@@ -23,8 +23,12 @@ public class FileItemWriterBeanDefinitionParser extends AbstractBeanDefinitionPa
     private AbstractBeanDefinition parseFileReadElement(Element element) {
         BeanDefinitionBuilder fileWriter = BeanDefinitionBuilder.rootBeanDefinition(FlatFileItemWriter.class);
         fileWriter.addPropertyValue("resource", element.getAttribute("resource"));
-        fileWriter.addPropertyValue("appendAllowed", "true");
         fileWriter.addPropertyValue("lineAggregator", lineAggregatorBeanDef(element));
+
+        String appendAllowed = element.getAttribute("appendAllowed");
+        if (StringUtils.hasText(appendAllowed)) {
+            fileWriter.addPropertyValue("appendAllowed", appendAllowed);
+        }
 
         String scope = element.getAttribute("scope");
         if (StringUtils.hasText(scope)) {

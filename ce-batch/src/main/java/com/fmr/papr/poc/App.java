@@ -1,12 +1,12 @@
 package com.fmr.papr.poc;
 
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.integration.channel.QueueChannel;
+import org.springframework.messaging.Message;
 
 public class App {
     public static void main(String[] args) {
@@ -16,9 +16,28 @@ public class App {
                         "spring/app-context.xml"
                 };
 
-        ApplicationContext context =
-                new ClassPathXmlApplicationContext(springConfig);
+        AbstractApplicationContext context = new ClassPathXmlApplicationContext(springConfig);
 
+        // launchJob(context);
+        context.registerShutdownHook();
+
+        System.out.println("\n========================================================="
+                + "\n                                                         "
+                + "\n    Waiting for Job execution to finish.                 "
+                + "\n                                                         "
+                + "\n=========================================================" );
+
+        final QueueChannel completeApplicationChannel =
+                context.getBean("completeApplication", QueueChannel.class);
+
+        completeApplicationChannel.receive();
+
+        System.out.println("\nDone!!");
+
+        System.exit(0);
+    }
+
+    private static void launchJob(ApplicationContext context) {
         JobLauncher jobLauncher = (JobLauncher) context.getBean("jobLauncher");
         Job job = (Job) context.getBean("spikeCE");
 
@@ -33,8 +52,5 @@ public class App {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("Done");
-
     }
 }

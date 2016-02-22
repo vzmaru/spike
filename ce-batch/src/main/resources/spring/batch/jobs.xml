@@ -17,7 +17,7 @@
 
   <job id="spikeCE">
     <step id="step1">
-      <tasklet task-executor="taskExecutor">
+      <tasklet task-executor="taskExecutor" throttle-limit="5">
         <chunk commit-interval="5"
                reader="ceReader"
                processor="itemProc"
@@ -26,22 +26,22 @@
     </step>
   </job>
 
+  <int:poller default="true" fixed-rate="10000"/>
+
   <int:channel id="inboundFileChannel"/>
   <int:channel id="outboundJobRequestChannel"/>
   <int:channel id="jobLaunchReplyChannel"/>
 
   <int-file:inbound-channel-adapter id="filePoller"
                                     channel="inboundFileChannel"
-                                    directory="file:/tmp/myfiles/"
-                                    filename-pattern="*.csv">
-    <int:poller fixed-rate="1000"/>
-  </int-file:inbound-channel-adapter>
+                                    directory="file:/tmp/ce/in/"
+                                    filename-pattern="*.csv"/>
+
 
   <int:transformer input-channel="inboundFileChannel"
                    output-channel="outboundJobRequestChannel">
-    <beans:bean class="io.spring.sbi.FileMessageToJobRequest">
-      <beans:property name="job" ref="personJob"/>
-      <beans:property name="fileParameterName" value="input.file.name"/>
+    <beans:bean class="com.fmr.papr.poc.intg.FileMessageToJobRequest">
+      <beans:property name="job" ref="spikeCE"/>
     </beans:bean>
   </int:transformer>
 
@@ -49,5 +49,19 @@
                                    reply-channel="jobLaunchReplyChannel"/>
 
   <int:logging-channel-adapter channel="jobLaunchReplyChannel"/>
+
+  <!--
+  <int:gateway id="notificationExecutionsListener"
+               service-interface="org.springframework.batch.core.JobExecutionListener"
+               default-request-channel="jobExecutions"/>
+
+  -->
+  <int-file:inbound-channel-adapter id="pollComplete"
+                                    directory="file:/tmp/ce/end"
+                                    channel="completeApplication"/>
+
+  <int:channel id="completeApplication">
+    <int:queue/>
+  </int:channel>
 
 </beans:beans>
